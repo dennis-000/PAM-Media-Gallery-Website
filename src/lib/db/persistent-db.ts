@@ -154,6 +154,7 @@ class PersistentDatabase {
   }
 
   private loadStore(): DatabaseStoreData {
+    // 1. Try server file system
     try {
       if (fs && STORE_FILE) {
         this.ensureDirectory();
@@ -176,7 +177,32 @@ class PersistentDatabase {
         }
       }
     } catch (error) {
-      console.warn('Error loading store file, initializing operating database:', error);
+      console.warn('Error loading store file from server:', error);
+    }
+
+    // 2. Try browser localStorage fallback
+    if (typeof window !== 'undefined') {
+      try {
+        const local = localStorage.getItem('pam_media_store');
+        if (local) {
+          const parsed = JSON.parse(local);
+          return {
+            services: parsed.services || INITIAL_SERVICES,
+            bookings: parsed.bookings || INITIAL_BOOKINGS,
+            galleries: parsed.galleries || INITIAL_GALLERIES,
+            testimonials: parsed.testimonials || INITIAL_TESTIMONIALS,
+            blogPosts: parsed.blogPosts || INITIAL_BLOG_POSTS,
+            activityLogs: parsed.activityLogs || INITIAL_ACTIVITY_LOGS,
+            projects: parsed.projects || INITIAL_PROJECTS,
+            clients: parsed.clients || INITIAL_CLIENTS,
+            invoices: parsed.invoices || INITIAL_INVOICES,
+            messages: parsed.messages || INITIAL_MESSAGES,
+            team: parsed.team || INITIAL_TEAM,
+          };
+        }
+      } catch (e) {
+        console.warn('Error loading store from localStorage:', e);
+      }
     }
 
     const initialData: DatabaseStoreData = {
@@ -197,16 +223,41 @@ class PersistentDatabase {
     return initialData;
   }
 
-  private saveStore(dataToSave?: DatabaseStoreData): void {
+  public saveStore(dataToSave?: DatabaseStoreData): void {
+    const payload = dataToSave || this.data;
+    
+    // Server file write
     try {
       if (fs && STORE_FILE) {
         this.ensureDirectory();
-        const payload = dataToSave || this.data;
         fs.writeFileSync(STORE_FILE, JSON.stringify(payload, null, 2), 'utf-8');
       }
     } catch (error) {
-      console.error('Failed to save persistent store:', error);
+      console.error('Failed to save persistent store to disk:', error);
     }
+
+    // Browser local storage write & API sync
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('pam_media_store', JSON.stringify(payload));
+        fetch('/api/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(err => console.warn('Background sync failed:', err));
+      } catch (e) {
+        console.warn('Failed to save store to localStorage:', e);
+      }
+    }
+  }
+
+  updateStoreData(newData: Partial<DatabaseStoreData>): DatabaseStoreData {
+    this.data = {
+      ...this.data,
+      ...newData,
+    };
+    this.saveStore();
+    return this.data;
   }
 
   getStoreData(): DatabaseStoreData {
@@ -220,6 +271,7 @@ class PersistentDatabase {
         if (res.ok) {
           const json = await res.json();
           this.data = json;
+          localStorage.setItem('pam_media_store', JSON.stringify(json));
           return json;
         }
       } catch (e) {
@@ -591,22 +643,22 @@ class PersistentDatabase {
     const activeProjects = this.data.projects.filter(p => p.stage !== 'completed' && p.stage !== 'archived').length;
     const activeGalleries = this.data.galleries.length;
     const totalClients = this.data.clients.length;
-
-    const totalRevenueGHS = this.data.invoices.reduce((sum, inv) => sum + inv.amountPaidGHS, 0) || 485000;
+    const paidRevenue = this.data.invoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + (inv.amountPaidGHS || 0), 0);
+    const totalRevenueGHS = paidRevenue > 0 ? paidRevenue : 68750;
 
     return {
-      totalBookings: totalBookings || 372,
+      totalBookings: totalBookings,
       pendingBookings,
-      activeProjects: activeProjects || 46,
+      activeProjects: activeProjects,
       activeGalleries,
-      totalClients: totalClients || 125,
+      totalClients: totalClients,
       totalRevenueGHS,
       storageUsedTB: 7.4,
-      totalDownloadsToday: this.data.galleries.reduce((sum, g) => sum + g.totalDownloads, 0) || 84,
-      conversionRatePercent: 68.5,
-      repeatClientPercent: 34.2,
-      averageDeliveryDays: 4.2,
-      totalPhotosDelivered: this.data.galleries.reduce((sum, g) => sum + g.imageCount, 0) || 42800,
+      totalDownloadsToday: this.data.galleries.reduce((sum, g) => sum + (g.totalDownloads || 0), 0),
+      conversionRatePercent: 78.5,
+      repeatClientPercent: 42.2,
+      averageDeliveryDays: 3.5,
+      totalPhotosDelivered: this.data.galleries.reduce((sum, g) => sum + (g.imageCount || 0), 0),
       mostViewedGallerySlug: this.data.galleries[0]?.slug || 'kwame-ama-wedding',
       inquirySources: {
         instagram: 42,
