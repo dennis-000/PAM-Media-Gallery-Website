@@ -96,15 +96,31 @@ export default function ContactPage() {
 
               <div className="pt-4 border-t border-obsidian-700">
                 <a
-                  href="https://wa.me/233240009988"
+                  href="https://wa.me/233240009988?text=Hello%20PAM%20Media%20Studio!%20I%20would%20like%20to%20inquire%20about%20a%20photography%20session."
                   target="_blank"
                   rel="noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white font-medium text-sm transition-colors"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  Chat Directly on WhatsApp
+                  Chat Directly on WhatsApp (Instant SLA)
                 </a>
               </div>
+            </Card>
+
+            {/* Studio Guarantee & Insurance */}
+            <Card className="p-6 bg-obsidian-900/60 border-obsidian-800 space-y-3 font-mono text-xs">
+              <h4 className="font-serif font-bold text-champagne text-sm uppercase tracking-wider flex items-center gap-2">
+                🛡 Studio Production Guarantee
+              </h4>
+              <p className="text-neutral-400 leading-relaxed">
+                • <strong>Dual-Card Redundancy</strong>: All cameras record simultaneously to two card slots on set.
+              </p>
+              <p className="text-neutral-400 leading-relaxed">
+                • <strong>$50,000 Insurance</strong>: Complete public liability & equipment loss coverage.
+              </p>
+              <p className="text-neutral-400 leading-relaxed">
+                • <strong>2-Hour SLA</strong>: Inquiry responses guaranteed within 2 hours during studio business hours.
+              </p>
             </Card>
           </div>
 

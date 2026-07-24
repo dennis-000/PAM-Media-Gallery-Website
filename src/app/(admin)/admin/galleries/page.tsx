@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input';
 import { createGalleryAction } from '@/lib/actions/admin-actions';
 import { persistentDb } from '@/lib/db/persistent-db';
 import { useMounted } from '@/lib/hooks/use-mounted';
+import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
 import { Gallery } from '@/lib/types';
 
 export default function AdminGalleriesPage() {
-  const mounted = useMounted();
+  const { mounted, authorized } = useAuthProtection();
   const [galleries, setGalleries] = useState<Gallery[]>(persistentDb.getGalleries());
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -38,7 +39,7 @@ export default function AdminGalleriesPage() {
     loadData();
   }, []);
 
-  if (!mounted) {
+  if (!mounted || !authorized) {
     return (
       <div className="space-y-8 animate-pulse">
         <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />

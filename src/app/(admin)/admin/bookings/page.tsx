@@ -12,10 +12,11 @@ import { Booking } from '@/lib/types';
 import { INITIAL_SERVICES } from '@/lib/db/mock-db';
 
 import { useMounted } from '@/lib/hooks/use-mounted';
+import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
 import { useEffect } from 'react';
 
 export default function AdminBookingsPage() {
-  const mounted = useMounted();
+  const { mounted, authorized } = useAuthProtection();
   const [bookings, setBookings] = useState<Booking[]>(persistentDb.getBookings());
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -42,7 +43,7 @@ export default function AdminBookingsPage() {
     loadData();
   }, []);
 
-  if (!mounted) {
+  if (!mounted || !authorized) {
     return (
       <div className="space-y-8 animate-pulse">
         <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
