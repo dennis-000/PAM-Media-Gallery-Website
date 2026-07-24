@@ -16,6 +16,18 @@ import { Gallery } from '@/lib/types';
 export default function AdminGalleriesPage() {
   const mounted = useMounted();
   const [galleries, setGalleries] = useState<Gallery[]>(persistentDb.getGalleries());
+  const [showModal, setShowModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [newGallery, setNewGallery] = useState({
+    title: '',
+    slug: '',
+    clientName: '',
+    clientEmail: '',
+    pinCode: Math.floor(1000 + Math.random() * 9000).toString(),
+    coverImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1600',
+  });
 
   useEffect(() => {
     async function loadData() {
@@ -37,18 +49,6 @@ export default function AdminGalleriesPage() {
       </div>
     );
   }
-  const [showModal, setShowModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  const [newGallery, setNewGallery] = useState({
-    title: '',
-    slug: '',
-    clientName: '',
-    clientEmail: '',
-    pinCode: Math.floor(1000 + Math.random() * 9000).toString(),
-    coverImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1600',
-  });
 
   const handleCreateGallery = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -15,6 +15,17 @@ import { useEffect } from 'react';
 export default function AdminClientsPage() {
   const mounted = useMounted();
   const [clients, setClients] = useState<ClientProfile[]>(persistentDb.getClients());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const [newClient, setNewClient] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    inquirySource: 'Website' as ClientProfile['inquirySource'],
+  });
 
   useEffect(() => {
     async function loadData() {
@@ -32,17 +43,6 @@ export default function AdminClientsPage() {
       </div>
     );
   }
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const [newClient, setNewClient] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    inquirySource: 'Website' as ClientProfile['inquirySource'],
-  });
 
   const handleAddClient = (e: React.FormEvent) => {
     e.preventDefault();

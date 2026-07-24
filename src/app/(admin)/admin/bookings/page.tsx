@@ -17,6 +17,22 @@ import { useEffect } from 'react';
 export default function AdminBookingsPage() {
   const mounted = useMounted();
   const [bookings, setBookings] = useState<Booking[]>(persistentDb.getBookings());
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+
+  const [newBooking, setNewBooking] = useState({
+    clientName: '',
+    clientEmail: '',
+    clientPhone: '',
+    serviceId: INITIAL_SERVICES[0].id,
+    serviceTitle: INITIAL_SERVICES[0].title,
+    shootDate: '',
+    location: 'Accra, Ghana',
+    budgetRange: 'GHS 20,000 - 35,000',
+    details: '',
+  });
 
   useEffect(() => {
     async function loadData() {
@@ -34,22 +50,6 @@ export default function AdminBookingsPage() {
       </div>
     );
   }
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-
-  const [newBooking, setNewBooking] = useState({
-    clientName: '',
-    clientEmail: '',
-    clientPhone: '',
-    serviceId: INITIAL_SERVICES[0].id,
-    serviceTitle: INITIAL_SERVICES[0].title,
-    shootDate: '',
-    location: 'Accra, Ghana',
-    budgetRange: 'GHS 20,000 - 35,000',
-    details: '',
-  });
 
   const handleCreateBooking = (e: React.FormEvent) => {
     e.preventDefault();
