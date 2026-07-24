@@ -101,17 +101,12 @@ export default function ServicesPage() {
 
               <CardFooter className="pt-6 border-t border-obsidian-700/60 flex flex-col gap-4">
                 <div className="w-full flex items-center justify-between">
-                  <div>
-                    <span className="text-xs text-neutral-500 block">Investment</span>
+                    <span className="text-xs text-neutral-500 block font-mono">Ghanaian Investment</span>
                     <div className="flex items-baseline gap-2">
                       <span className="font-serif text-2xl font-bold text-champagne">
-                        GHS {service.basePriceGHS.toLocaleString()}
-                      </span>
-                      <span className="text-xs text-neutral-400">
-                        (~${service.basePriceUSD.toLocaleString()})
+                        GH₵ {service.basePriceGHS.toLocaleString()}
                       </span>
                     </div>
-                  </div>
                 </div>
 
                 <Link href={`/booking?service=${service.id}`} className="w-full">

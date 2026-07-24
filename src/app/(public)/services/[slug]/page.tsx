@@ -177,11 +177,11 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
 
             <div className="flex flex-wrap items-center gap-6 pt-4 border-t border-obsidian-800">
               <div>
-                <span className="text-xs text-neutral-500 block uppercase tracking-wider">Starting Investment</span>
-                <span className="font-serif text-3xl font-bold text-champagne">
-                  GHS {detail.basePriceGHS.toLocaleString()}
+                <span className="text-xs text-neutral-500 block uppercase tracking-wider font-mono">Ghanaian Investment</span>
+                <span className="font-serif text-3xl sm:text-4xl font-bold text-champagne">
+                  GH₵ {detail.basePriceGHS.toLocaleString()}
                 </span>
-                <span className="text-xs text-neutral-400 block">(${detail.basePriceUSD.toLocaleString()} USD)</span>
+                <span className="text-[11px] text-emerald-400 block font-mono">✓ MTN MoMo, Telecel Cash & Bank Wire Accepted</span>
               </div>
 
               <Link href={`/booking?service=${detail.slug}`}>

@@ -73,10 +73,10 @@ export default function BookingPage() {
   ];
 
   const budgetOptions = [
-    'GHS 5,000 - 10,000',
-    'GHS 10,000 - 20,000',
-    'GHS 20,000 - 35,000',
-    'GHS 35,000+',
+    'GH₵ 5,000 - 10,000',
+    'GH₵ 10,000 - 20,000',
+    'GH₵ 20,000 - 35,000',
+    'GH₵ 35,000+',
   ];
 
   const handleNext = () => {
