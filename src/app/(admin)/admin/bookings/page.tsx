@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { persistentDb } from '@/lib/db/persistent-db';
-import { updateBookingStatusAction, createBookingAction } from '@/lib/actions/admin-actions';
+import { updateBookingStatusAction } from '@/lib/actions/admin-actions';
+import { submitBookingAction } from '@/lib/actions/booking-actions';
 import { Booking } from '@/lib/types';
 import { INITIAL_SERVICES } from '@/lib/db/mock-db';
 import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
@@ -95,7 +96,7 @@ export default function AdminBookingsPage() {
 
   const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    await createBookingAction(newBooking);
+    await submitBookingAction(newBooking);
     setBookings(persistentDb.getBookings());
     setShowCreateModal(false);
     setNewBooking({

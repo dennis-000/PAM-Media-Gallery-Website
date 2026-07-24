@@ -36,6 +36,7 @@ export interface Booking {
   location: string;
   budgetRange: string;
   details: string;
+  inspirationUrl?: string;
   inspirationUrls?: string[];
   status: BookingStatus;
   createdAt: string;
@@ -150,8 +151,12 @@ export interface Invoice {
   bookingId?: string;
   clientName: string;
   clientEmail: string;
+  serviceTitle?: string;
   amountDueGHS: number;
   amountPaidGHS: number;
+  subtotalGHS?: number;
+  vatGHS?: number;
+  totalGHS?: number;
   status: 'draft' | 'sent' | 'paid' | 'overdue';
   dueDate: string;
   items: InvoiceItem[];

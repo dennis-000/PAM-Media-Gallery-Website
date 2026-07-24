@@ -315,7 +315,7 @@ class PersistentDatabase {
     title: string;
     clientName: string;
     clientEmail: string;
-    serviceCategory: string;
+    serviceCategory?: string;
     stage: Project['stage'];
     shootDate: string;
     dueDate: string;
@@ -324,6 +324,7 @@ class PersistentDatabase {
   }): Project {
     const newPrj: Project = {
       ...prjData,
+      serviceCategory: prjData.serviceCategory || 'Weddings',
       id: `prj-${Date.now()}`,
       projectNumber: `PRJ-2026-${Math.floor(100 + Math.random() * 900)}`,
       progressPercent: 15,
@@ -509,6 +510,56 @@ class PersistentDatabase {
     this.data.invoices.unshift(newInvoice);
     this.saveStore();
     return newInvoice;
+  }
+
+  createInvoice(invData: {
+    clientName: string;
+    clientEmail: string;
+    serviceTitle?: string;
+    subtotalGHS?: number;
+    vatGHS?: number;
+    totalGHS?: number;
+    status?: Invoice['status'];
+    dueDate: string;
+  }): Invoice {
+    const subtotal = invData.subtotalGHS || 25000;
+    const vat = invData.vatGHS || Math.round(subtotal * 0.15);
+    const total = invData.totalGHS || (subtotal + vat);
+
+    const newInvoice: Invoice = {
+      id: `inv-${Date.now()}`,
+      invoiceNumber: `PAM-INV-2026-${Math.floor(100 + Math.random() * 900)}`,
+      clientName: invData.clientName,
+      clientEmail: invData.clientEmail,
+      serviceTitle: invData.serviceTitle || 'Luxury Photography Commission',
+      subtotalGHS: subtotal,
+      vatGHS: vat,
+      totalGHS: total,
+      amountDueGHS: invData.status === 'paid' ? 0 : total,
+      amountPaidGHS: invData.status === 'paid' ? total : 0,
+      status: invData.status || 'sent',
+      dueDate: invData.dueDate,
+      items: [
+        { description: invData.serviceTitle || 'Luxury Photography Commission', amountGHS: subtotal },
+        { description: 'VAT (15%)', amountGHS: vat }
+      ],
+      createdAt: new Date().toISOString(),
+    };
+
+    this.data.invoices.unshift(newInvoice);
+    this.saveStore();
+    return newInvoice;
+  }
+
+  markInvoicePaid(id: string): Invoice | undefined {
+    const inv = this.data.invoices.find(i => i.id === id);
+    if (inv) {
+      inv.status = 'paid';
+      inv.amountPaidGHS = inv.amountDueGHS || inv.totalGHS || 28750;
+      inv.amountDueGHS = 0;
+      this.saveStore();
+    }
+    return inv;
   }
 
   getMessages(): MessageThread[] {
