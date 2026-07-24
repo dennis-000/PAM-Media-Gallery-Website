@@ -121,6 +121,7 @@ export interface Gallery {
   id: string;
   title: string;
   slug: string;
+  accessKey?: string;
   clientName: string;
   clientEmail: string;
   coverImage: string;

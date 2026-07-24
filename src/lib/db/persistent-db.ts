@@ -394,8 +394,14 @@ class PersistentDatabase {
     return this.data.galleries;
   }
 
-  getGalleryBySlug(slug: string): Gallery | undefined {
-    return this.data.galleries.find(g => g.slug === slug);
+  getGalleryBySlug(slugOrKey: string): Gallery | undefined {
+    if (!slugOrKey) return undefined;
+    const clean = slugOrKey.trim().toLowerCase();
+    return this.data.galleries.find(g => 
+      g.slug.toLowerCase() === clean || 
+      (g.accessKey && g.accessKey.toLowerCase() === clean) ||
+      (g.accessKey && g.accessKey.toLowerCase() === `pam-${clean}`)
+    );
   }
 
   verifyPin(slug: string, pin: string): boolean {
@@ -407,6 +413,7 @@ class PersistentDatabase {
     const newGallery: Gallery = {
       ...galleryData,
       id: `gal-${Date.now()}`,
+      accessKey: galleryData.accessKey || `PAM-${Math.floor(1000 + Math.random() * 9000)}`,
       imageCount: galleryData.images?.length || 0,
       favoriteCount: 0,
       totalDownloads: 0,

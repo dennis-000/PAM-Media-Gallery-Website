@@ -45,6 +45,7 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
   
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
   const [showExifDrawer, setShowExifDrawer] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [downloadNotification, setDownloadNotification] = useState<string | null>(null);
 
   useEffect(() => {
@@ -285,7 +286,17 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
               </Button>
             </div>
 
-            <Button onClick={handleDownloadAllZip} size="sm" className="gap-2">
+            <Button
+              onClick={() => setShowShareModal(true)}
+              variant="outline"
+              size="sm"
+              className="gap-2 border-champagne/30 text-champagne hover:bg-champagne/10 text-xs"
+            >
+              <Share2 className="w-4 h-4" />
+              Share Vault with Family
+            </Button>
+
+            <Button onClick={handleDownloadAllZip} size="sm" className="gap-2 text-xs">
               <Download className="w-4 h-4" />
               Download All (Zip Archive)
             </Button>
@@ -474,7 +485,55 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
                 </div>
               </div>
             )}
-          </div>
+      {/* Family & Guests Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-obsidian-800 pb-4">
+              <div className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-champagne" />
+                <h3 className="font-serif text-xl font-bold text-parchment">Share Vault with Family</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setShowShareModal(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Invite your family and friends to view, heart, and download your high-resolution fine art collection.
+              </p>
+
+              <div className="p-4 rounded-xl bg-obsidian-950 border border-obsidian-800 space-y-3 font-mono text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-500">Vault Access Key:</span>
+                  <span className="font-bold text-champagne">{gallery.accessKey || 'PAM-8892'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-500">Family PIN Code:</span>
+                  <span className="font-bold text-parchment">{gallery.pinCode}</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-neutral-500">Direct Link:</span>
+                  <span className="text-neutral-400 truncate max-w-[200px]">/gallery/{gallery.slug}</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => {
+                  const url = `${window.location.origin}/gallery/${gallery.slug}`;
+                  const msg = `✨ PAM Media Fine Art Vault Invitation ✨\n\nYou are invited by ${gallery.clientName} to view our official photo collection!\n\n🔐 Vault Access Key: ${gallery.accessKey || 'PAM-8892'}\n🔑 Family PIN: ${gallery.pinCode}\n🌐 Direct Access Link: ${url}`;
+                  navigator.clipboard.writeText(msg);
+                  setDownloadNotification('Family invitation copied! Ready to paste into WhatsApp or Email.');
+                  setTimeout(() => setDownloadNotification(null), 4000);
+                  setShowShareModal(false);
+                }}
+                className="w-full gap-2"
+              >
+                <Sparkles className="w-4 h-4" /> Copy Invitation for WhatsApp / Email
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
     </div>
