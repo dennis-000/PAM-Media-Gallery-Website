@@ -21,10 +21,17 @@ export default function AdminLoginPage() {
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const sessionData = {
+      name: fullName || 'Pamela Asiedu (Studio Director)',
+      email: email || 'admin@pammedia.com',
+      role: role || 'owner',
+      token: `session-${Date.now()}`
+    };
+    localStorage.setItem('pam_admin_session', JSON.stringify(sessionData));
     setTimeout(() => {
       setLoading(false);
-      router.push('/admin');
-    }, 800);
+      router.push('/admin/bookings');
+    }, 400);
   };
 
   return (

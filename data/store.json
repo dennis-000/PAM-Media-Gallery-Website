@@ -113,6 +113,24 @@
   ],
   "bookings": [
     {
+      "clientName": "Mr. Dennis",
+      "clientEmail": "odennisasiedu@gmail.com",
+      "clientPhone": "0201421976",
+      "serviceId": "srv-corporate-brand",
+      "serviceTitle": "Corporate & Executive Branding",
+      "shootDate": "2026-07-24",
+      "location": "Kumasi / Ashanti Region",
+      "budgetRange": "GH₵ 20,000 - 35,000",
+      "details": "Tech Events",
+      "inspirationUrls": [
+        "https://www.pinterest.com/asiedudennis30/wedding-corset-couple/?request_params=%7B%221%22%3A%20130%2C%20%227%22%3A%20749788971095626440%2C%20%228%22%3A%20909305049704569671%2C%20%2230%22%3A%20%22Wedding%20Corset%20couple%22%2C%20%2232%22%3A%2045%2C%20%2233%22%3A%20%5B909304981054953780%2C%20909304981054953778%2C%20909304981054953776%2C%20909304981054735956%2C%20909304981054734666%2C%20909304981054734643%2C%20909304981054734642%2C%20909304981054734622%2C%20909304981054734615%2C%20909304981054734609%2C%20909304981054734603%2C%20909304981054734598%2C%20909304981054734559%2C%20909304981054441011%2C%20909304981053828863%2C%20909304981053828859%2C%20909304981053828853%2C%20909304981053828851%2C%20909304981053828846%2C%20909304981053828831%5D%2C%20%2236%22%3A%20%5B909305049704569671%5D%2C%20%2237%22%3A%20%22Wedding%20Corset%20couple%22%2C%20%2234%22%3A%200%2C%20%22102%22%3A%204%7D&full_feed_title=Wedding%20Corset%20couple&view_parameter_type=3069&pins_display=3"
+      ],
+      "id": "bk-1784859010331",
+      "bookingNumber": "PAM-2026-282",
+      "status": "pending",
+      "createdAt": "2026-07-24T02:10:10.332Z"
+    },
+    {
       "id": "bk-1001",
       "bookingNumber": "PAM-2026-089",
       "clientName": "Dr. Kojo & Abigail Osei",
@@ -429,6 +447,14 @@
   ],
   "activityLogs": [
     {
+      "action": "New Booking Registered",
+      "entityType": "booking",
+      "entityId": "bk-1784859010331",
+      "details": "Mr. Dennis requested Corporate & Executive Branding (Kumasi / Ashanti Region)",
+      "id": "act-1784859010341",
+      "timestamp": "Just now"
+    },
+    {
       "action": "Client Gallery Created",
       "entityType": "gallery",
       "entityId": "gal-1784853718539",
@@ -463,6 +489,22 @@
   ],
   "projects": [
     {
+      "title": "Mr. Dennis — Corporate & Executive Branding",
+      "clientName": "Mr. Dennis",
+      "clientEmail": "odennisasiedu@gmail.com",
+      "serviceCategory": "Corporate & Executive Branding",
+      "stage": "booked",
+      "shootDate": "2026-07-24",
+      "dueDate": "2026-08-07",
+      "assignedLead": "Pamela Addo (Chief Photographer)",
+      "totalPhotosExpected": 500,
+      "id": "prj-1784859010334",
+      "projectNumber": "PRJ-2026-766",
+      "progressPercent": 15,
+      "photosEdited": 0,
+      "createdAt": "2026-07-24T02:10:10.334Z"
+    },
+    {
       "id": "prj-101",
       "projectNumber": "PRJ-2026-042",
       "title": "Kwame & Ama — Royal Wedding",
@@ -481,6 +523,21 @@
     }
   ],
   "clients": [
+    {
+      "id": "cli-1784859010338",
+      "clientCode": "CLI-848",
+      "name": "Mr. Dennis",
+      "email": "odennisasiedu@gmail.com",
+      "phone": "0201421976",
+      "company": "",
+      "totalBookings": 1,
+      "totalSpendGHS": 0,
+      "inquirySource": "Website",
+      "isRepeatClient": false,
+      "notes": "New production client registered.",
+      "lastActive": "Just now",
+      "createdAt": "2026-07-24T02:10:10.338Z"
+    },
     {
       "id": "cli-01",
       "clientCode": "CLI-801",
