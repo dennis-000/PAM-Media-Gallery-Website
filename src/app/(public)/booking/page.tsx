@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { 
@@ -40,11 +40,26 @@ export default function BookingPage() {
     clientPhone: '',
     serviceId: initialServiceId,
     shootDate: '',
-    location: 'Accra, Ghana',
+    location: 'Accra (Airport, Cantonments, Labadi)',
     budgetRange: 'GHS 20,000 - 35,000',
+    preferredContact: 'WhatsApp',
     details: '',
     inspirationUrl: '',
   });
+
+  // Draft Autosave Effect
+  useEffect(() => {
+    const saved = localStorage.getItem('pam_media_booking_draft');
+    if (saved) {
+      try {
+        setFormData(prev => ({ ...prev, ...JSON.parse(saved) }));
+      } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('pam_media_booking_draft', JSON.stringify(formData));
+  }, [formData]);
 
   const selectedService = INITIAL_SERVICES.find(s => s.id === formData.serviceId) || INITIAL_SERVICES[0];
 

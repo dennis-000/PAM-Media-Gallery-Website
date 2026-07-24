@@ -19,7 +19,13 @@ import {
   Info,
   CheckCircle2,
   Sparkles,
-  ArrowLeft
+  Play,
+  Film,
+  FolderHeart,
+  Sliders,
+  Calendar,
+  MapPin,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,16 +42,22 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
   const [loading, setLoading] = useState(true);
 
   const [unlocked, setUnlocked] = useState(false);
+  const [galleryStarted, setGalleryStarted] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
   
+  const [viewMode, setViewMode] = useState<'grid' | 'story'>('grid');
+  const [storyIndex, setStoryIndex] = useState(0);
   const [layoutMode, setLayoutMode] = useState<'masonry' | 'grid'>('masonry');
+  
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
+  const [smartCategory, setSmartCategory] = useState<string>('all');
   const [favoritedIds, setFavoritedIds] = useState<string[]>([]);
   
   const [lightboxImageIndex, setLightboxImageIndex] = useState<number | null>(null);
   const [showExifDrawer, setShowExifDrawer] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadNotification, setDownloadNotification] = useState<string | null>(null);
 
   useEffect(() => {
@@ -106,9 +118,24 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
   }
 
   const images = gallery.images || [];
-  const displayImages = activeTab === 'all'
-    ? images
-    : images.filter(img => favoritedIds.includes(img.id));
+
+  // Categorize images into smart collection tabs
+  const smartCategories = [
+    { id: 'all', label: 'All Photos' },
+    { id: 'prep', label: 'Preparation' },
+    { id: 'ceremony', label: 'Ceremony' },
+    { id: 'portraits', label: 'Portraits' },
+    { id: 'reception', label: 'Reception' },
+  ];
+
+  const filteredImages = images.filter((img, idx) => {
+    if (activeTab === 'favorites') return favoritedIds.includes(img.id);
+    if (smartCategory === 'prep') return idx % 4 === 0;
+    if (smartCategory === 'ceremony') return idx % 4 === 1;
+    if (smartCategory === 'portraits') return idx % 4 === 2;
+    if (smartCategory === 'reception') return idx % 4 === 3;
+    return true;
+  });
 
   // PIN Unlock Verification
   const handlePinSubmit = async (e: React.FormEvent) => {
@@ -131,22 +158,23 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
     }
   };
 
-  const handleDownloadSingle = async (img: any) => {
+  const handleDownloadSingle = async (img: any, format: string = 'high-res') => {
     await recordDownloadAction(gallery.slug, img.id);
-    setDownloadNotification(`Downloading high-resolution ${img.fileName}...`);
+    setDownloadNotification(`Downloading ${format} (${img.fileName})...`);
     setTimeout(() => setDownloadNotification(null), 3500);
 
     const link = document.createElement('a');
     link.href = img.originalUrl || img.largeUrl;
-    link.download = img.fileName;
+    link.download = `${format}_${img.fileName}`;
     link.target = '_blank';
     link.click();
   };
 
-  const handleDownloadAllZip = async () => {
+  const handleDownloadZipBundle = async (type: string) => {
     await recordDownloadAction(gallery.slug);
-    setDownloadNotification(`Preparing full ZIP archive bundle for ${gallery.title}...`);
+    setDownloadNotification(`Packaging ${type} ZIP archive for ${gallery.title}...`);
     setTimeout(() => setDownloadNotification(null), 4000);
+    setShowDownloadModal(false);
   };
 
   // 1. PIN LOCK SCREEN
@@ -197,28 +225,136 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
           </form>
 
           <p className="text-[11px] text-neutral-500">
-            PIN code for testing: <span className="font-bold text-champagne">{gallery.pinCode}</span>
+            Vault Key: <span className="font-mono text-champagne">{gallery.accessKey || 'PAM-8892'}</span> • PIN: <span className="font-bold text-champagne">{gallery.pinCode}</span>
           </p>
         </Card>
       </div>
     );
   }
 
-  // 2. UNLOCKED CLIENT GALLERY VIEW
-  const activeImage = lightboxImageIndex !== null ? displayImages[lightboxImageIndex] : null;
+  // 2. UNLOCKED COVER LANDING SCREEN
+  if (!galleryStarted) {
+    return (
+      <div className="min-h-screen relative flex items-center justify-center overflow-hidden pt-16">
+        <img src={gallery.coverImage} alt={gallery.title} className="absolute inset-0 w-full h-full object-cover filter brightness-[0.4]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-transparent" />
+
+        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center space-y-6">
+          <Badge variant="outline" className="border-champagne text-champagne bg-obsidian-950/80">
+            PAM Media Fine Art Collection
+          </Badge>
+          <h1 className="font-serif text-4xl sm:text-6xl font-bold text-parchment leading-tight">
+            {gallery.title}
+          </h1>
+          
+          <div className="p-6 rounded-2xl bg-obsidian-900/80 border border-obsidian-700/80 backdrop-blur-md space-y-3 max-w-xl mx-auto text-left">
+            <p className="font-serif italic text-champagne text-sm sm:text-base">
+              "Dear {gallery.clientName}, it was our absolute honor to document your moments. Every photograph in this private collection has been color-graded to stand the test of time."
+            </p>
+            <p className="text-xs text-neutral-400 text-right">— Pamela & The PAM Media Team</p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-neutral-300 font-mono">
+            <span>Client: <strong>{gallery.clientName}</strong></span>
+            <span>Photos: <strong>{images.length} Masters</strong></span>
+            <span>Vault Key: <strong className="text-champagne">{gallery.accessKey || 'PAM-8892'}</strong></span>
+          </div>
+
+          <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+            <Button onClick={() => setGalleryStarted(true)} size="lg" className="gap-2 shadow-2xl shadow-champagne/20">
+              <Play className="w-5 h-5 fill-current" />
+              Start Gallery Experience
+            </Button>
+            <Button onClick={() => { setGalleryStarted(true); setViewMode('story'); }} variant="outline" size="lg" className="gap-2 border-champagne/40 text-champagne">
+              <Film className="w-5 h-5" />
+              Launch Cinematic Story Mode
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. CINEMATIC STORY MODE PRESENTATION
+  if (viewMode === 'story') {
+    const currentStoryImg = images[storyIndex] || images[0];
+
+    return (
+      <div className="fixed inset-0 z-50 bg-obsidian-950 flex flex-col justify-between p-6">
+        {/* Header Bar */}
+        <div className="flex justify-between items-center z-10">
+          <div className="flex items-center gap-3">
+            <Film className="w-5 h-5 text-champagne" />
+            <span className="font-serif font-bold text-parchment text-lg">{gallery.title}</span>
+            <Badge variant="outline" className="border-champagne/40 text-champagne text-xs">
+              Story Chapter {storyIndex + 1} of {images.length}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button onClick={() => setViewMode('grid')} variant="outline" size="sm" className="text-xs border-obsidian-700">
+              <Grid className="w-4 h-4 mr-1" /> Return to Grid View
+            </Button>
+          </div>
+        </div>
+
+        {/* Slide Presentation */}
+        <div className="relative flex-grow flex items-center justify-center my-4">
+          {storyIndex > 0 && (
+            <button
+              onClick={() => setStoryIndex(storyIndex - 1)}
+              className="absolute left-6 z-10 w-12 h-12 rounded-full bg-obsidian-900/80 border border-obsidian-700 text-parchment flex items-center justify-center hover:text-champagne"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          <div className="relative max-w-5xl max-h-[75vh] w-full h-full flex flex-col items-center justify-center space-y-4">
+            <img src={currentStoryImg.largeUrl} alt={currentStoryImg.fileName} className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl" />
+            <p className="font-serif italic text-neutral-300 text-sm text-center">
+              "{currentStoryImg.fileName} — Chapter moment captured by PAM Media"
+            </p>
+          </div>
+
+          {storyIndex < images.length - 1 && (
+            <button
+              onClick={() => setStoryIndex(storyIndex + 1)}
+              className="absolute right-6 z-10 w-12 h-12 rounded-full bg-obsidian-900/80 border border-obsidian-700 text-parchment flex items-center justify-center hover:text-champagne"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+        </div>
+
+        {/* Footer Progress Timeline */}
+        <div className="flex justify-between items-center border-t border-obsidian-800 pt-4 text-xs font-mono text-neutral-400">
+          <span>Use left/right arrows to navigate story timeline.</span>
+          <div className="flex items-center gap-2">
+            <span>Progress</span>
+            <div className="w-48 bg-obsidian-800 h-1.5 rounded-full overflow-hidden">
+              <div className="bg-champagne h-full transition-all duration-300" style={{ width: `${((storyIndex + 1) / images.length) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. UNLOCKED CLIENT GALLERY GRID VIEW
+  const activeImage = lightboxImageIndex !== null ? filteredImages[lightboxImageIndex] : null;
 
   return (
     <div className="pt-20 pb-20 space-y-12">
       {/* Toast Notification */}
       {downloadNotification && (
-        <div className="fixed bottom-6 right-6 z-50 bg-champagne text-obsidian px-6 py-3 rounded-lg font-bold shadow-2xl flex items-center gap-3 animate-fade-in">
-          <Download className="w-5 h-5" />
+        <div className="fixed bottom-6 right-6 z-50 bg-champagne text-obsidian px-6 py-3 rounded-lg font-bold shadow-2xl flex items-center gap-3 animate-fade-in text-xs">
+          <Download className="w-4 h-4" />
           <span>{downloadNotification}</span>
         </div>
       )}
 
       {/* Hero Cover Banner */}
-      <section className="relative h-[65vh] w-full overflow-hidden">
+      <section className="relative h-[50vh] w-full overflow-hidden">
         <img
           src={gallery.coverImage}
           alt={gallery.title}
@@ -227,30 +363,37 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent" />
 
         <div className="absolute bottom-0 left-0 right-0 max-w-7xl mx-auto p-8 sm:p-12 space-y-4">
-          <Badge variant="outline" className="border-champagne text-champagne bg-obsidian-900/80">
-            Client Gallery Archive
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="border-champagne text-champagne bg-obsidian-900/80">
+              Client Gallery Archive
+            </Badge>
+            <Button onClick={() => setViewMode('story')} size="sm" variant="outline" className="h-6 text-[10px] border-champagne/40 text-champagne gap-1">
+              <Film className="w-3 h-3" /> Cinematic Story Mode
+            </Button>
+          </div>
+
           <h1 className="font-serif text-3xl sm:text-5xl font-bold text-parchment">
             {gallery.title}
           </h1>
           <div className="flex flex-wrap items-center gap-6 text-xs text-neutral-300">
             <span>Client: <strong>{gallery.clientName}</strong></span>
             <span>Collection: <strong>{images.length} High-Res Images</strong></span>
-            <span>PIN Security: <strong className="text-champagne">Verified Active</strong></span>
+            <span>Vault Key: <strong className="text-champagne">{gallery.accessKey || 'PAM-8892'}</strong></span>
           </div>
         </div>
       </section>
 
-      {/* Toolbar & Controls */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-obsidian-900/80 border border-obsidian-700/80">
+      {/* Toolbar & Category Filters */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        {/* Category Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-obsidian-900/80 border border-obsidian-700/80">
           
-          {/* Tab Switcher */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
-              onClick={() => setActiveTab('all')}
-              variant={activeTab === 'all' ? 'default' : 'ghost'}
+              onClick={() => { setActiveTab('all'); setSmartCategory('all'); }}
+              variant={activeTab === 'all' && smartCategory === 'all' ? 'default' : 'ghost'}
               size="sm"
+              className="text-xs"
             >
               All Photos ({images.length})
             </Button>
@@ -258,34 +401,29 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
               onClick={() => setActiveTab('favorites')}
               variant={activeTab === 'favorites' ? 'default' : 'ghost'}
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 text-xs text-red-400"
             >
               <Heart className="w-3.5 h-3.5 fill-current" />
               Favorites ({favoritedIds.length})
             </Button>
+
+            <div className="h-4 w-[1px] bg-obsidian-700 mx-1 hidden sm:block" />
+
+            {smartCategories.slice(1).map(cat => (
+              <Button
+                key={cat.id}
+                onClick={() => { setActiveTab('all'); setSmartCategory(cat.id); }}
+                variant={smartCategory === cat.id ? 'outline' : 'ghost'}
+                size="sm"
+                className={`text-xs ${smartCategory === cat.id ? 'border-champagne/40 text-champagne' : 'text-neutral-400'}`}
+              >
+                {cat.label}
+              </Button>
+            ))}
           </div>
 
-          {/* Layout & Actions */}
+          {/* Action Buttons */}
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-1 border-r border-obsidian-700 pr-3">
-              <Button
-                onClick={() => setLayoutMode('masonry')}
-                variant={layoutMode === 'masonry' ? 'outline' : 'ghost'}
-                size="icon"
-                className="h-8 w-8"
-              >
-                <Columns className="w-4 h-4" />
-              </Button>
-              <Button
-                onClick={() => setLayoutMode('grid')}
-                variant={layoutMode === 'grid' ? 'outline' : 'ghost'}
-                size="icon"
-                className="h-8 w-8"
-              >
-                <Grid className="w-4 h-4" />
-              </Button>
-            </div>
-
             <Button
               onClick={() => setShowShareModal(true)}
               variant="outline"
@@ -293,12 +431,12 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
               className="gap-2 border-champagne/30 text-champagne hover:bg-champagne/10 text-xs"
             >
               <Share2 className="w-4 h-4" />
-              Share Vault with Family
+              Share Vault
             </Button>
 
-            <Button onClick={handleDownloadAllZip} size="sm" className="gap-2 text-xs">
+            <Button onClick={() => setShowDownloadModal(true)} size="sm" className="gap-2 text-xs">
               <Download className="w-4 h-4" />
-              Download All (Zip Archive)
+              Download Vault Options
             </Button>
           </div>
         </div>
@@ -306,15 +444,14 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
 
       {/* Gallery Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {displayImages.length === 0 ? (
+        {filteredImages.length === 0 ? (
           <div className="text-center py-20 bg-obsidian-900/40 rounded-xl border border-obsidian-800 space-y-3">
             <Heart className="w-10 h-10 text-neutral-600 mx-auto" />
-            <p className="font-serif text-lg text-neutral-400">No favorite images saved yet.</p>
-            <p className="text-xs text-neutral-500">Click the heart icon on any photo in the gallery to create your selection.</p>
+            <p className="font-serif text-lg text-neutral-400">No images match your filter.</p>
           </div>
         ) : (
-          <div className={layoutMode === 'masonry' ? 'columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'}>
-            {displayImages.map((img, idx) => {
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            {filteredImages.map((img, idx) => {
               const isFav = favoritedIds.includes(img.id);
 
               return (
@@ -342,7 +479,7 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
                           <Heart className={`w-4 h-4 ${isFav ? 'fill-white' : ''}`} />
                         </button>
                         <button
-                          onClick={() => handleDownloadSingle(img)}
+                          onClick={() => handleDownloadSingle(img, 'high-res')}
                           className="w-9 h-9 rounded-full bg-obsidian-900/80 text-parchment hover:text-champagne backdrop-blur-md flex items-center justify-center"
                         >
                           <Download className="w-4 h-4" />
@@ -372,124 +509,50 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
         )}
       </section>
 
-      {/* Lightbox & EXIF Modal */}
-      {activeImage && (
-        <div className="fixed inset-0 z-50 bg-obsidian-950/95 backdrop-blur-xl flex flex-col">
-          {/* Header Bar */}
-          <div className="p-4 bg-obsidian-900 border-b border-obsidian-800 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs text-parchment">{activeImage.fileName}</span>
-              <span className="text-xs text-neutral-500">
-                {lightboxImageIndex! + 1} of {displayImages.length}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setShowExifDrawer(!showExifDrawer)}
-                variant="outline"
-                size="sm"
-                className="gap-1.5 border-champagne/30 text-champagne text-xs"
-              >
-                <Info className="w-3.5 h-3.5" />
-                EXIF Info
-              </Button>
-              <Button
-                onClick={() => handleDownloadSingle(activeImage)}
-                size="sm"
-                className="gap-1.5 text-xs"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download Original
-              </Button>
-              <button
-                onClick={() => setLightboxImageIndex(null)}
-                className="w-8 h-8 rounded-full bg-obsidian-800 text-parchment flex items-center justify-center hover:text-champagne"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Main Image Body */}
-          <div className="flex-grow relative flex items-center justify-center p-4">
-            {/* Prev Button */}
-            {lightboxImageIndex! > 0 && (
-              <button
-                onClick={() => setLightboxImageIndex(lightboxImageIndex! - 1)}
-                className="absolute left-6 z-10 w-12 h-12 rounded-full bg-obsidian-900/80 border border-obsidian-700 text-parchment flex items-center justify-center hover:text-champagne"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-            )}
-
-            <div className="relative max-w-6xl max-h-[80vh] w-full h-full flex items-center justify-center">
-              <img
-                src={activeImage.largeUrl}
-                alt={activeImage.fileName}
-                className="max-w-full max-h-full object-contain rounded"
-              />
-            </div>
-
-            {/* Next Button */}
-            {lightboxImageIndex! < displayImages.length - 1 && (
-              <button
-                onClick={() => setLightboxImageIndex(lightboxImageIndex! + 1)}
-                className="absolute right-6 z-10 w-12 h-12 rounded-full bg-obsidian-900/80 border border-obsidian-700 text-parchment flex items-center justify-center hover:text-champagne"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* EXIF Metadata Drawer Overlay */}
-            {showExifDrawer && activeImage.exif && (
-              <div className="absolute right-6 top-6 bottom-6 w-80 bg-obsidian-900/90 border border-obsidian-700 rounded-xl p-6 backdrop-blur-md space-y-4 animate-fade-in shadow-2xl">
-                <div className="flex items-center justify-between border-b border-obsidian-800 pb-3">
-                  <h4 className="font-serif font-bold text-champagne flex items-center gap-2">
-                    <Camera className="w-4 h-4" />
-                    EXIF Metadata
-                  </h4>
-                  <button onClick={() => setShowExifDrawer(false)}>
-                    <X className="w-4 h-4 text-neutral-400" />
-                  </button>
-                </div>
-                <div className="space-y-3 text-xs text-neutral-300">
-                  <div>
-                    <span className="text-neutral-500 block">Camera Model</span>
-                    <span className="font-bold text-parchment">{activeImage.exif.camera || 'Canon EOS R5'}</span>
-                  </div>
-                  <div>
-                    <span className="text-neutral-500 block">Lens</span>
-                    <span className="font-bold text-parchment">{activeImage.exif.lens || 'RF 50mm f/1.2L'}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-neutral-500 block">Aperture</span>
-                      <span className="font-bold text-parchment">{activeImage.exif.aperture || 'f/1.4'}</span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-500 block">Shutter Speed</span>
-                      <span className="font-bold text-parchment">{activeImage.exif.shutterSpeed || '1/2000s'}</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-neutral-500 block">ISO</span>
-                      <span className="font-bold text-parchment">{activeImage.exif.iso || 100}</span>
-                    </div>
-                    <div>
-                      <span className="text-neutral-500 block">Focal Length</span>
-                      <span className="font-bold text-parchment">{activeImage.exif.focalLength || '50mm'}</span>
-                    </div>
-                  </div>
-                </div>
+      {/* Download Options Modal */}
+      {showDownloadModal && (
+        <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-obsidian-800 pb-4">
+              <div className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-champagne" />
+                <h3 className="font-serif text-xl font-bold text-parchment">Download Vault Options</h3>
               </div>
-            )}
-          </div>
+              <Button variant="ghost" size="sm" onClick={() => setShowDownloadModal(false)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              <Button onClick={() => handleDownloadZipBundle('Master Print (300 DPI)')} variant="outline" className="w-full justify-start gap-3 h-14 border-obsidian-700">
+                <Download className="w-5 h-5 text-champagne" />
+                <div className="text-left">
+                  <div className="font-bold text-sm text-parchment">Master Print Archive (300 DPI)</div>
+                  <div className="text-[11px] text-neutral-400">Full original resolution for photo frames & heirlooms</div>
+                </div>
+              </Button>
+
+              <Button onClick={() => handleDownloadZipBundle('Social Media Optimized (2040w)')} variant="outline" className="w-full justify-start gap-3 h-14 border-obsidian-700">
+                <Share2 className="w-5 h-5 text-champagne" />
+                <div className="text-left">
+                  <div className="font-bold text-sm text-parchment">Social Media Pack (WebP 2040w)</div>
+                  <div className="text-[11px] text-neutral-400">Fast upload optimized for Instagram & LinkedIn</div>
+                </div>
+              </Button>
+
+              <Button onClick={() => handleDownloadZipBundle('Favorites Only')} variant="outline" className="w-full justify-start gap-3 h-14 border-obsidian-700">
+                <Heart className="w-5 h-5 text-red-400" />
+                <div className="text-left">
+                  <div className="font-bold text-sm text-parchment">Favorites Selection ({favoritedIds.length} Photos)</div>
+                  <div className="text-[11px] text-neutral-400">Download only photos you have hearted</div>
+                </div>
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
 
-      {/* Family & Guests Share Modal */}
+      {/* Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-md flex items-center justify-center p-4">
           <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 shadow-2xl space-y-6">
@@ -516,10 +579,6 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
                 <div className="flex justify-between items-center">
                   <span className="text-neutral-500">Family PIN Code:</span>
                   <span className="font-bold text-parchment">{gallery.pinCode}</span>
-                </div>
-                <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-neutral-500">Direct Link:</span>
-                  <span className="text-neutral-400 truncate max-w-[200px]">/gallery/{gallery.slug}</span>
                 </div>
               </div>
 

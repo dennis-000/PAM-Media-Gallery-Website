@@ -198,8 +198,13 @@ export default function PortfolioPage() {
               </div>
 
               <div className="pt-6 border-t border-obsidian-800 space-y-3">
-                <p className="text-xs text-neutral-400">Captured by PAM Media Chief Photographer</p>
-                <Button onClick={() => setActiveLightboxImage(null)} className="w-full">
+                <p className="text-xs text-neutral-400">Captured by PAM Media Editorial Team</p>
+                <Link href={`/portfolio/${activeLightboxImage.id === 'p1' ? 'kwame-ama-wedding' : 'goldkey-headquarters'}`}>
+                  <Button className="w-full gap-2">
+                    <Eye className="w-4 h-4" /> Read Full Documented Story
+                  </Button>
+                </Link>
+                <Button variant="ghost" onClick={() => setActiveLightboxImage(null)} className="w-full text-xs text-neutral-400">
                   Close Lightbox
                 </Button>
               </div>
