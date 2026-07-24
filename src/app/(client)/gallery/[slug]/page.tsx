@@ -485,6 +485,10 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
       {/* Family & Guests Share Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-md flex items-center justify-center p-4">
