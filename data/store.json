@@ -113,6 +113,22 @@
   ],
   "bookings": [
     {
+      "clientName": "Dennis Asiedu Opoku",
+      "clientEmail": "odennisasiedu@gmail.com",
+      "clientPhone": "123456789",
+      "serviceId": "srv-wedding-mastery",
+      "serviceTitle": "Luxury Wedding Storytelling",
+      "shootDate": "2026-11-11",
+      "location": "Cape Coast / Elmina Beach",
+      "budgetRange": "GH₵ 20,000 - 35,000",
+      "details": "",
+      "inspirationUrls": [],
+      "id": "bk-1784859857867",
+      "bookingNumber": "PAM-2026-994",
+      "status": "pending",
+      "createdAt": "2026-07-24T02:24:17.867Z"
+    },
+    {
       "clientName": "Mr. Dennis",
       "clientEmail": "odennisasiedu@gmail.com",
       "clientPhone": "0201421976",
@@ -127,7 +143,7 @@
       ],
       "id": "bk-1784859010331",
       "bookingNumber": "PAM-2026-282",
-      "status": "pending",
+      "status": "cancelled",
       "createdAt": "2026-07-24T02:10:10.332Z"
     },
     {
@@ -447,6 +463,30 @@
   ],
   "activityLogs": [
     {
+      "action": "Booking Status Update",
+      "entityType": "booking",
+      "entityId": "bk-1784859010331",
+      "details": "Booking PAM-2026-282 marked as CANCELLED",
+      "id": "act-1784859898432",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "New Booking Registered",
+      "entityType": "booking",
+      "entityId": "bk-1784859857867",
+      "details": "Dennis Asiedu Opoku requested Luxury Wedding Storytelling (Cape Coast / Elmina Beach)",
+      "id": "act-1784859857870",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Booking Status Update",
+      "entityType": "booking",
+      "entityId": "bk-1784859010331",
+      "details": "Booking PAM-2026-282 marked as CONFIRMED",
+      "id": "act-1784859438915",
+      "timestamp": "Just now"
+    },
+    {
       "action": "New Booking Registered",
       "entityType": "booking",
       "entityId": "bk-1784859010331",
@@ -489,6 +529,22 @@
   ],
   "projects": [
     {
+      "title": "Dennis Asiedu Opoku — Luxury Wedding Storytelling",
+      "clientName": "Dennis Asiedu Opoku",
+      "clientEmail": "odennisasiedu@gmail.com",
+      "serviceCategory": "Luxury Wedding Storytelling",
+      "stage": "booked",
+      "shootDate": "2026-11-11",
+      "dueDate": "2026-11-25",
+      "assignedLead": "Pamela Addo (Chief Photographer)",
+      "totalPhotosExpected": 500,
+      "id": "prj-1784859857868",
+      "projectNumber": "PRJ-2026-441",
+      "progressPercent": 15,
+      "photosEdited": 0,
+      "createdAt": "2026-07-24T02:24:17.868Z"
+    },
+    {
       "title": "Mr. Dennis — Corporate & Executive Branding",
       "clientName": "Mr. Dennis",
       "clientEmail": "odennisasiedu@gmail.com",
@@ -530,7 +586,7 @@
       "email": "odennisasiedu@gmail.com",
       "phone": "0201421976",
       "company": "",
-      "totalBookings": 1,
+      "totalBookings": 2,
       "totalSpendGHS": 0,
       "inquirySource": "Website",
       "isRepeatClient": false,

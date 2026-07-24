@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { persistentDb } from '@/lib/db/persistent-db';
 import { MessageThread } from '@/lib/types';
 import { useMounted } from '@/lib/hooks/use-mounted';
+import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
 
 export default function AdminMessagesPage() {
-  const mounted = useMounted();
+  const { mounted, authorized } = useAuthProtection();
   const [threads, setThreads] = useState<MessageThread[]>(persistentDb.getMessages());
   const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -42,7 +43,7 @@ export default function AdminMessagesPage() {
     setReplyText('');
   };
 
-  if (!mounted) {
+  if (!mounted || !authorized) {
     return (
       <div className="space-y-8 animate-pulse">
         <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />

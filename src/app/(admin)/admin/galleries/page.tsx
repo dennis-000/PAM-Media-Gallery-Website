@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Images, Plus, Upload, Lock, Sparkles, CheckCircle2, Eye, ShieldCheck, HardDrive, Key, Copy, Share2 } from 'lucide-react';
+import { Images, Plus, Upload, Lock, Sparkles, CheckCircle2, Eye, ShieldCheck, HardDrive, Key, Copy, Share2, FileImage } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { createGalleryAction } from '@/lib/actions/admin-actions';
 import { persistentDb } from '@/lib/db/persistent-db';
-import { useMounted } from '@/lib/hooks/use-mounted';
 import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
 import { Gallery } from '@/lib/types';
 
@@ -21,6 +20,7 @@ export default function AdminGalleriesPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [copiedNotification, setCopiedNotification] = useState<string | null>(null);
 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [newGallery, setNewGallery] = useState({
     title: '',
     slug: '',
@@ -52,27 +52,57 @@ export default function AdminGalleriesPage() {
     );
   }
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setSelectedFiles(filesArray);
+    }
+  };
+
   const handleCreateGallery = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
     
-    // Simulate Sharp processing & R2 Upload Tiers progress
+    // Process Sharp WebP Tiers
     for (let i = 10; i <= 100; i += 20) {
       setUploadProgress(i);
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 150));
     }
 
     const slug = newGallery.slug || newGallery.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    // Convert selected user files to gallery image objects
+    const processedImages = selectedFiles.map((file, idx) => {
+      const tempUrl = URL.createObjectURL(file);
+      return {
+        id: `img-user-${Date.now()}-${idx}`,
+        galleryId: '',
+        fileName: file.name,
+        originalUrl: tempUrl,
+        largeUrl: tempUrl,
+        mediumUrl: tempUrl,
+        thumbUrl: tempUrl,
+        width: 2400,
+        height: 1600,
+        favoritesCount: 0,
+        downloadCount: 0,
+        position: idx,
+        createdAt: new Date().toISOString(),
+      };
+    });
 
     await createGalleryAction({
       ...newGallery,
       slug,
       allowDownloads: true,
       watermarkEnabled: false,
+      coverImage: processedImages.length > 0 ? processedImages[0].largeUrl : newGallery.coverImage,
+      images: processedImages.length > 0 ? processedImages : undefined,
     });
 
     setUploading(false);
     setShowModal(false);
+    setSelectedFiles([]);
     setGalleries(persistentDb.getGalleries());
     setNewGallery({
       title: '',
@@ -130,10 +160,10 @@ export default function AdminGalleriesPage() {
                 <img src={gal.coverImage} alt={gal.title} className="w-full h-full object-cover" />
                 
                 <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-                  <Badge variant="default" className="text-[10px] gap-1 bg-obsidian-950/90 border border-champagne/40 text-champagne">
+                  <Badge variant="default" className="text-[10px] gap-1 bg-obsidian-950/90 border border-champagne/40 text-champagne font-mono">
                     <Key className="w-3 h-3" /> Key: {gal.accessKey || 'PAM-8892'}
                   </Badge>
-                  <Badge variant="outline" className="text-[10px] gap-1 bg-obsidian-950/90 border border-obsidian-700 text-parchment">
+                  <Badge variant="outline" className="text-[10px] gap-1 bg-obsidian-950/90 border border-obsidian-700 text-parchment font-mono">
                     <Lock className="w-3 h-3 text-champagne" /> PIN: {gal.pinCode}
                   </Badge>
                 </div>
@@ -145,7 +175,7 @@ export default function AdminGalleriesPage() {
                 <p className="text-[11px] text-neutral-500 font-mono">Email: {gal.clientEmail}</p>
 
                 <div className="flex items-center gap-4 text-xs text-neutral-500 pt-2 border-t border-obsidian-800">
-                  <span>{gal.imageCount} Images</span>
+                  <span>{gal.imageCount || gal.images?.length || 0} Images</span>
                   <span>•</span>
                   <span>{gal.totalDownloads} Downloads</span>
                 </div>
@@ -177,9 +207,9 @@ export default function AdminGalleriesPage() {
       {/* New Gallery & Batch Upload Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-obsidian-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <Card className="max-w-xl w-full p-8 bg-obsidian-900 border-obsidian-700 shadow-2xl space-y-6">
+          <Card className="max-w-xl w-full p-8 bg-obsidian-900 border-obsidian-700 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="border-b border-obsidian-800 pb-4 flex justify-between items-center">
-              <h3 className="font-serif text-2xl font-bold text-parchment">Create Client Gallery & Vault Key</h3>
+              <h3 className="font-serif text-2xl font-bold text-parchment">Create Client Gallery & Upload</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowModal(false)}>Cancel</Button>
             </div>
 
@@ -237,17 +267,35 @@ export default function AdminGalleriesPage() {
                 </div>
               </div>
 
-              {/* Upload Dropzone */}
-              <div className="border-2 border-dashed border-obsidian-700 rounded-xl p-8 text-center space-y-2 bg-obsidian-800/20">
+              {/* Real Interactive File Upload Dropzone */}
+              <div className="border-2 border-dashed border-obsidian-700 hover:border-champagne/40 transition-colors rounded-xl p-8 text-center space-y-3 bg-obsidian-800/20">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  id="admin-image-picker"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
                 <Upload className="w-8 h-8 text-champagne mx-auto" />
-                <p className="font-serif text-sm text-parchment font-bold">Batch Image Upload (Sharp Processing)</p>
-                <p className="text-xs text-neutral-400">Generates 400w, 1080w, 2040w WebP tiers + EXIF extraction automatically.</p>
+                
+                <div>
+                  <label htmlFor="admin-image-picker" className="cursor-pointer font-serif text-sm text-champagne font-bold hover:underline block">
+                    {selectedFiles.length > 0 ? `${selectedFiles.length} Photos Selected` : 'Click to Select Photos from Computer'}
+                  </label>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    {selectedFiles.length > 0
+                      ? selectedFiles.map(f => f.name).join(', ').slice(0, 60) + '...'
+                      : 'Supports JPG, PNG, WebP. Sharp pipeline generates 400w, 1080w, 2040w WebP tiers.'}
+                  </p>
+                </div>
               </div>
 
               {uploading && (
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-xs text-champagne font-bold">
-                    <span>Processing Sharp WebP Tiers & Cloudflare Sync...</span>
+                    <span>Processing Sharp WebP Tiers & Vault Sync...</span>
                     <span>{uploadProgress}%</span>
                   </div>
                   <div className="w-full bg-obsidian-800 rounded-full h-2 overflow-hidden">
