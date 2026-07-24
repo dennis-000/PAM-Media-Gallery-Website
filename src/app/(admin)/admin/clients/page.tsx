@@ -9,8 +9,29 @@ import { Input } from '@/components/ui/input';
 import { persistentDb } from '@/lib/db/persistent-db';
 import { ClientProfile } from '@/lib/types';
 
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useEffect } from 'react';
+
 export default function AdminClientsPage() {
+  const mounted = useMounted();
   const [clients, setClients] = useState<ClientProfile[]>(persistentDb.getClients());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setClients(persistentDb.getClients());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="h-96 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+      </div>
+    );
+  }
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClient, setSelectedClient] = useState<ClientProfile | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);

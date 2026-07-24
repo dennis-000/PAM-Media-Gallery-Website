@@ -11,8 +11,29 @@ import { updateBookingStatusAction } from '@/lib/actions/admin-actions';
 import { Booking } from '@/lib/types';
 import { INITIAL_SERVICES } from '@/lib/db/mock-db';
 
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useEffect } from 'react';
+
 export default function AdminBookingsPage() {
+  const mounted = useMounted();
   const [bookings, setBookings] = useState<Booking[]>(persistentDb.getBookings());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setBookings(persistentDb.getBookings());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="h-96 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+      </div>
+    );
+  }
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);

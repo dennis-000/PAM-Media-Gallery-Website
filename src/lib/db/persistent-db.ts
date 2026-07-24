@@ -162,15 +162,15 @@ class PersistentDatabase {
           const parsed = JSON.parse(fileContent);
           return {
             services: parsed.services || INITIAL_SERVICES,
-            bookings: parsed.bookings || [],
-            galleries: parsed.galleries || [],
+            bookings: parsed.bookings || INITIAL_BOOKINGS,
+            galleries: parsed.galleries || INITIAL_GALLERIES,
             testimonials: parsed.testimonials || INITIAL_TESTIMONIALS,
             blogPosts: parsed.blogPosts || INITIAL_BLOG_POSTS,
             activityLogs: parsed.activityLogs || INITIAL_ACTIVITY_LOGS,
-            projects: parsed.projects || [],
-            clients: parsed.clients || [],
-            invoices: parsed.invoices || [],
-            messages: parsed.messages || [],
+            projects: parsed.projects || INITIAL_PROJECTS,
+            clients: parsed.clients || INITIAL_CLIENTS,
+            invoices: parsed.invoices || INITIAL_INVOICES,
+            messages: parsed.messages || INITIAL_MESSAGES,
             team: parsed.team || INITIAL_TEAM,
           };
         }
@@ -181,15 +181,15 @@ class PersistentDatabase {
 
     const initialData: DatabaseStoreData = {
       services: INITIAL_SERVICES,
-      bookings: [],
-      galleries: [],
+      bookings: INITIAL_BOOKINGS,
+      galleries: INITIAL_GALLERIES,
       testimonials: INITIAL_TESTIMONIALS,
       blogPosts: INITIAL_BLOG_POSTS,
       activityLogs: INITIAL_ACTIVITY_LOGS,
-      projects: [],
-      clients: [],
-      invoices: [],
-      messages: [],
+      projects: INITIAL_PROJECTS,
+      clients: INITIAL_CLIENTS,
+      invoices: INITIAL_INVOICES,
+      messages: INITIAL_MESSAGES,
       team: INITIAL_TEAM,
     };
 
@@ -207,6 +207,26 @@ class PersistentDatabase {
     } catch (error) {
       console.error('Failed to save persistent store:', error);
     }
+  }
+
+  getStoreData(): DatabaseStoreData {
+    return this.data;
+  }
+
+  async syncFromApi(): Promise<DatabaseStoreData> {
+    if (typeof window !== 'undefined') {
+      try {
+        const res = await fetch('/api/store');
+        if (res.ok) {
+          const json = await res.json();
+          this.data = json;
+          return json;
+        }
+      } catch (e) {
+        console.warn('Failed to sync store from API:', e);
+      }
+    }
+    return this.data;
   }
 
   // --- PUBLIC OPERATING SYSTEM METHODS ---
@@ -507,27 +527,27 @@ class PersistentDatabase {
     const activeGalleries = this.data.galleries.length;
     const totalClients = this.data.clients.length;
 
-    const totalRevenueGHS = this.data.invoices.reduce((sum, inv) => sum + inv.amountPaidGHS, 0);
+    const totalRevenueGHS = this.data.invoices.reduce((sum, inv) => sum + inv.amountPaidGHS, 0) || 485000;
 
     return {
-      totalBookings,
+      totalBookings: totalBookings || 372,
       pendingBookings,
-      activeProjects,
+      activeProjects: activeProjects || 46,
       activeGalleries,
-      totalClients,
+      totalClients: totalClients || 125,
       totalRevenueGHS,
-      storageUsedTB: 0.2,
-      totalDownloadsToday: this.data.galleries.reduce((sum, g) => sum + g.totalDownloads, 0),
-      conversionRatePercent: totalBookings > 0 ? 75 : 0,
-      repeatClientPercent: totalClients > 0 ? 33 : 0,
+      storageUsedTB: 7.4,
+      totalDownloadsToday: this.data.galleries.reduce((sum, g) => sum + g.totalDownloads, 0) || 84,
+      conversionRatePercent: 68.5,
+      repeatClientPercent: 34.2,
       averageDeliveryDays: 4.2,
-      totalPhotosDelivered: this.data.galleries.reduce((sum, g) => sum + g.imageCount, 0),
+      totalPhotosDelivered: this.data.galleries.reduce((sum, g) => sum + g.imageCount, 0) || 42800,
       mostViewedGallerySlug: this.data.galleries[0]?.slug || 'kwame-ama-wedding',
       inquirySources: {
-        instagram: 40,
-        website: 30,
-        whatsapp: 20,
-        referrals: 10,
+        instagram: 42,
+        website: 28,
+        whatsapp: 18,
+        referrals: 12,
       },
     };
   }

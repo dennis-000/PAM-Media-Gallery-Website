@@ -24,13 +24,41 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { mockDb } from '@/lib/db/mock-db';
 import { persistentDb } from '@/lib/db/persistent-db';
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useState, useEffect } from 'react';
 
 export default function AdminDashboardPage() {
-  const stats = persistentDb.getAdminStats();
-  const bookings = persistentDb.getBookings().slice(0, 4);
-  const projects = persistentDb.getProjects().slice(0, 4);
-  const activityLogs = persistentDb.getActivityLogs().slice(0, 5);
-  const messages = persistentDb.getMessages();
+  const mounted = useMounted();
+  const [stats, setStats] = useState(persistentDb.getAdminStats());
+  const [bookings, setBookings] = useState(persistentDb.getBookings().slice(0, 4));
+  const [projects, setProjects] = useState(persistentDb.getProjects().slice(0, 4));
+  const [activityLogs, setActivityLogs] = useState(persistentDb.getActivityLogs().slice(0, 5));
+  const [messages, setMessages] = useState(persistentDb.getMessages());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setStats(persistentDb.getAdminStats());
+      setBookings(persistentDb.getBookings().slice(0, 4));
+      setProjects(persistentDb.getProjects().slice(0, 4));
+      setActivityLogs(persistentDb.getActivityLogs().slice(0, 5));
+      setMessages(persistentDb.getMessages());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 pb-12 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-32 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 pb-12">

@@ -27,9 +27,13 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { persistentDb } from '@/lib/db/persistent-db';
 import { verifyGalleryPinAction, toggleFavoriteAction, recordDownloadAction } from '@/lib/actions/gallery-actions';
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { Gallery } from '@/lib/types';
+import { useEffect } from 'react';
 
 export default function ClientGalleryPage({ params }: { params: { slug: string } }) {
-  const gallery = persistentDb.getGalleryBySlug(params.slug) || persistentDb.getGalleries()[0];
+  const mounted = useMounted();
+  const [gallery, setGallery] = useState<Gallery | null>(null);
 
   const [unlocked, setUnlocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -43,16 +47,22 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
   const [showExifDrawer, setShowExifDrawer] = useState(false);
   const [downloadNotification, setDownloadNotification] = useState<string | null>(null);
 
-  if (!gallery) {
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      const loaded = persistentDb.getGalleryBySlug(params.slug) || persistentDb.getGalleries()[0];
+      setGallery(loaded || null);
+    }
+    loadData();
+  }, [params.slug]);
+
+  if (!mounted || !gallery) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 pt-20">
-        <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 text-center space-y-4">
-          <Lock className="w-12 h-12 text-neutral-600 mx-auto" />
-          <h2 className="font-serif text-2xl font-bold text-parchment">Gallery Not Found</h2>
-          <p className="text-xs text-neutral-400">The requested gallery slug standard does not exist or has expired.</p>
-          <Link href="/">
-            <Button variant="outline" className="border-champagne/40 text-champagne">Return to Home</Button>
-          </Link>
+        <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 text-center space-y-4 animate-pulse">
+          <Lock className="w-12 h-12 text-champagne/40 mx-auto" />
+          <h2 className="font-serif text-2xl font-bold text-parchment">Loading Gallery...</h2>
+          <p className="text-xs text-neutral-400">Authenticating private client media vault.</p>
         </Card>
       </div>
     );

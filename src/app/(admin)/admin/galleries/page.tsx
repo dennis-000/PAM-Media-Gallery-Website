@@ -7,11 +7,36 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { mockDb } from '@/lib/db/mock-db';
 import { createGalleryAction } from '@/lib/actions/admin-actions';
+import { persistentDb } from '@/lib/db/persistent-db';
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useEffect } from 'react';
+import { Gallery } from '@/lib/types';
 
 export default function AdminGalleriesPage() {
-  const [galleries, setGalleries] = useState(mockDb.getGalleries());
+  const mounted = useMounted();
+  const [galleries, setGalleries] = useState<Gallery[]>(persistentDb.getGalleries());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setGalleries(persistentDb.getGalleries());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-64 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);

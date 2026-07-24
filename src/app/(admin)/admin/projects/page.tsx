@@ -9,8 +9,33 @@ import { persistentDb } from '@/lib/db/persistent-db';
 import { Project, ProjectStage } from '@/lib/types';
 import { updateProjectStageAction } from '@/lib/actions/admin-actions';
 
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useEffect } from 'react';
+
 export default function AdminProjectsPage() {
+  const mounted = useMounted();
   const [projects, setProjects] = useState<Project[]>(persistentDb.getProjects());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setProjects(persistentDb.getProjects());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="flex gap-4 overflow-x-auto pb-6">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="w-80 h-96 shrink-0 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const stages: { id: ProjectStage; label: string; color: string }[] = [
     { id: 'booked', label: 'Booked', color: 'border-blue-600/40 text-blue-400' },

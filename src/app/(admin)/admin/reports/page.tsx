@@ -5,8 +5,33 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { persistentDb } from '@/lib/db/persistent-db';
 
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useState, useEffect } from 'react';
+
 export default function AdminReportsPage() {
-  const stats = persistentDb.getAdminStats();
+  const mounted = useMounted();
+  const [stats, setStats] = useState(persistentDb.getAdminStats());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setStats(persistentDb.getAdminStats());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-32 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

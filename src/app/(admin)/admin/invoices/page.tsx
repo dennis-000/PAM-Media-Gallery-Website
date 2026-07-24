@@ -7,8 +7,30 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { persistentDb } from '@/lib/db/persistent-db';
 
+import { useMounted } from '@/lib/hooks/use-mounted';
+import { useState, useEffect } from 'react';
+import { Invoice } from '@/lib/types';
+
 export default function AdminInvoicesPage() {
-  const invoices = persistentDb.getInvoices();
+  const mounted = useMounted();
+  const [invoices, setInvoices] = useState<Invoice[]>(persistentDb.getInvoices());
+
+  useEffect(() => {
+    async function loadData() {
+      await persistentDb.syncFromApi();
+      setInvoices(persistentDb.getInvoices());
+    }
+    loadData();
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="h-96 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
