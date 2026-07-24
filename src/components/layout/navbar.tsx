@@ -172,7 +172,7 @@ export function Navbar() {
             <div className="flex items-center justify-between border-b border-obsidian-800 pb-4">
               <div className="flex items-center gap-2">
                 <Lock className="w-5 h-5 text-champagne" />
-                <h3 className="font-serif text-xl font-bold text-parchment">Access Client Portal</h3>
+                <h3 className="font-serif text-xl font-bold text-parchment">Access Client Vault</h3>
               </div>
               <Button variant="ghost" size="sm" onClick={() => setPortalModalOpen(false)}>
                 <X className="w-4 h-4" />
@@ -182,7 +182,7 @@ export function Navbar() {
             <form onSubmit={handlePortalSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase text-neutral-300">
-                  Enter Your Private Gallery Name or Slug
+                  Enter Your Private Gallery Link or Slug
                 </label>
                 <Input
                   required
@@ -191,27 +191,45 @@ export function Navbar() {
                   onChange={(e) => setGallerySlugInput(e.target.value)}
                   className="text-sm font-mono"
                 />
-                <p className="text-[11px] text-neutral-500">
-                  Enter the gallery link provided in your PAM Media delivery email.
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  PAM Media delivers private, PIN-protected fine art collections directly to booked clients.
                 </p>
               </div>
 
               <Button type="submit" size="lg" className="w-full gap-2">
-                <Key className="w-4 h-4" /> Open Vault
+                <Key className="w-4 h-4" /> Open Private Vault
               </Button>
             </form>
 
-            <div className="pt-4 border-t border-obsidian-800 space-y-2 text-center">
-              <span className="text-[11px] text-neutral-500 uppercase tracking-wider block">
-                Sample Client Vault (Test Mode)
-              </span>
-              <Link
-                href="/gallery/kwame-ama-wedding"
-                onClick={() => setPortalModalOpen(false)}
-                className="text-xs text-champagne hover:underline font-serif block"
-              >
-                Kwame & Ama — Royal Wedding (PIN: 2026) →
-              </Link>
+            <div className="pt-4 border-t border-obsidian-800 space-y-3 text-center">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-parchment">Not a booked client yet?</p>
+                <p className="text-[11px] text-neutral-400">
+                  Explore our public work or reserve your custom media session.
+                </p>
+              </div>
+              <div className="flex justify-center gap-3 pt-1">
+                <Link href="/portfolio" onClick={() => setPortalModalOpen(false)}>
+                  <Button variant="outline" size="sm" className="text-xs border-obsidian-700">
+                    View Public Portfolio
+                  </Button>
+                </Link>
+                <Link href="/booking" onClick={() => setPortalModalOpen(false)}>
+                  <Button size="sm" className="text-xs">
+                    Book Session
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="pt-2">
+                <Link
+                  href="/gallery/kwame-ama-wedding"
+                  onClick={() => setPortalModalOpen(false)}
+                  className="text-[11px] text-champagne hover:underline font-serif block"
+                >
+                  Test Demo Vault (PIN: 2026) →
+                </Link>
+              </div>
             </div>
           </Card>
         </div>

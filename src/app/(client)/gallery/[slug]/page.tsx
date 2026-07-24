@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
@@ -29,11 +29,11 @@ import { persistentDb } from '@/lib/db/persistent-db';
 import { verifyGalleryPinAction, toggleFavoriteAction, recordDownloadAction } from '@/lib/actions/gallery-actions';
 import { useMounted } from '@/lib/hooks/use-mounted';
 import { Gallery } from '@/lib/types';
-import { useEffect } from 'react';
 
 export default function ClientGalleryPage({ params }: { params: { slug: string } }) {
   const mounted = useMounted();
   const [gallery, setGallery] = useState<Gallery | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [unlocked, setUnlocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -50,19 +50,55 @@ export default function ClientGalleryPage({ params }: { params: { slug: string }
   useEffect(() => {
     async function loadData() {
       await persistentDb.syncFromApi();
-      const loaded = persistentDb.getGalleryBySlug(params.slug) || persistentDb.getGalleries()[0];
+      const loaded = persistentDb.getGalleryBySlug(params.slug);
       setGallery(loaded || null);
+      setLoading(false);
     }
     loadData();
   }, [params.slug]);
 
-  if (!mounted || !gallery) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 pt-20">
         <Card className="max-w-md w-full p-8 bg-obsidian-900 border-obsidian-700 text-center space-y-4 animate-pulse">
           <Lock className="w-12 h-12 text-champagne/40 mx-auto" />
-          <h2 className="font-serif text-2xl font-bold text-parchment">Loading Gallery...</h2>
+          <h2 className="font-serif text-2xl font-bold text-parchment">Loading Media Vault...</h2>
           <p className="text-xs text-neutral-400">Authenticating private client media vault.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!gallery) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 pt-20">
+        <Card className="max-w-lg w-full p-8 bg-obsidian-900 border-obsidian-700 text-center space-y-6 shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-obsidian-800 border border-obsidian-700 text-neutral-500 flex items-center justify-center mx-auto">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <Badge variant="outline" className="border-champagne/30 text-champagne">
+              Private Media Vault
+            </Badge>
+            <h2 className="font-serif text-3xl font-bold text-parchment">Gallery Not Found or Expired</h2>
+            <p className="text-xs text-neutral-400 leading-relaxed max-w-sm mx-auto">
+              This gallery link is private or does not exist. If you are a client expecting your deliverable, please check your delivery email or contact the studio.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Link href="/contact">
+              <Button variant="outline" className="w-full sm:w-auto border-champagne/40 text-champagne text-xs">
+                Contact Studio Support
+              </Button>
+            </Link>
+            <Link href="/portfolio">
+              <Button className="w-full sm:w-auto text-xs">
+                View Public Portfolio
+              </Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );
