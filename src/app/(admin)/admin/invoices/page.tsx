@@ -1,14 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileSpreadsheet, Plus, DollarSign, CheckCircle2, Clock, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { persistentDb } from '@/lib/db/persistent-db';
-
 import { useMounted } from '@/lib/hooks/use-mounted';
-import { useState, useEffect } from 'react';
 import { Invoice } from '@/lib/types';
 
 export default function AdminInvoicesPage() {

@@ -70,7 +70,7 @@ export default function AdminGalleriesPage() {
 
     setUploading(false);
     setShowModal(false);
-    setGalleries(mockDb.getGalleries());
+    setGalleries(persistentDb.getGalleries());
   };
 
   return (
