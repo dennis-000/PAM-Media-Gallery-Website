@@ -78,7 +78,7 @@ export default function AdminBookingsPage() {
           subtotalGHS: 25000,
           vatGHS: 3750,
           totalGHS: 28750,
-          status: 'pending',
+          status: 'sent',
           dueDate: targetBk.shootDate,
         });
       }

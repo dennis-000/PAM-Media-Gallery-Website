@@ -23,12 +23,14 @@ export async function updateProjectStageAction(id: string, stage: ProjectStage) 
 export async function createGalleryAction(data: {
   title: string;
   slug: string;
+  accessKey?: string;
   clientName: string;
   clientEmail: string;
   coverImage: string;
   pinCode: string;
   allowDownloads: boolean;
   watermarkEnabled: boolean;
+  images?: any[];
 }) {
   const newGallery = await db.createGallery({
     ...data,

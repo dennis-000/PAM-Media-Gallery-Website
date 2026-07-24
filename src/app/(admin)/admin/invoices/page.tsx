@@ -54,7 +54,7 @@ export default function AdminInvoicesPage() {
       subtotalGHS: newInvoice.subtotalGHS,
       vatGHS,
       totalGHS,
-      status: 'pending',
+      status: 'sent',
       dueDate: newInvoice.dueDate,
     });
     setInvoices(persistentDb.getInvoices());
@@ -71,7 +71,7 @@ export default function AdminInvoicesPage() {
   };
 
   const totalPaid = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.amountPaidGHS || 0), 0);
-  const totalPending = invoices.filter(i => i.status === 'pending').reduce((sum, i) => sum + (i.amountDueGHS || 0), 0);
+  const totalPending = invoices.filter(i => i.status !== 'paid').reduce((sum, i) => sum + (i.amountDueGHS || 0), 0);
 
   return (
     <div className="space-y-8">
