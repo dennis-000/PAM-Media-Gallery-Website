@@ -143,7 +143,7 @@
       ],
       "id": "bk-1784859010331",
       "bookingNumber": "PAM-2026-282",
-      "status": "cancelled",
+      "status": "confirmed",
       "createdAt": "2026-07-24T02:10:10.332Z"
     },
     {
@@ -462,6 +462,22 @@
     }
   ],
   "activityLogs": [
+    {
+      "action": "Booking Status Update",
+      "entityType": "booking",
+      "entityId": "bk-1784859010331",
+      "details": "Booking PAM-2026-282 marked as CONFIRMED",
+      "id": "act-1784860897692",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Booking Status Update",
+      "entityType": "booking",
+      "entityId": "bk-1784859010331",
+      "details": "Booking PAM-2026-282 marked as CONFIRMED",
+      "id": "act-1784860884295",
+      "timestamp": "Just now"
+    },
     {
       "action": "Booking Status Update",
       "entityType": "booking",

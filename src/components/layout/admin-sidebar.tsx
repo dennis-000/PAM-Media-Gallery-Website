@@ -171,15 +171,15 @@ export function AdminSidebar() {
 
       {/* Footer Profile & Exit */}
       <div className="pt-4 border-t border-obsidian-800 space-y-3">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-champagne/20 border border-champagne/40 flex items-center justify-center font-serif font-bold text-champagne text-xs">
+        <Link href="/admin/profile" className="flex items-center gap-3 px-2 p-1.5 rounded-lg hover:bg-obsidian-800/60 transition-colors group">
+          <div className="w-8 h-8 rounded-full bg-champagne/20 border border-champagne/40 flex items-center justify-center font-serif font-bold text-champagne text-xs group-hover:border-champagne">
             PA
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-bold text-parchment truncate">Pamela Addo</p>
+            <p className="text-xs font-bold text-parchment truncate group-hover:text-champagne transition-colors">Pamela Addo</p>
             <p className="text-[10px] text-champagne font-mono">Studio Owner • Executive</p>
           </div>
-        </div>
+        </Link>
 
         <Link
           href="/"

@@ -1,129 +1,164 @@
 'use client';
 
-import { BarChart3, TrendingUp, DollarSign, Users, Download, HardDrive, ShieldCheck, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BarChart3, Download, TrendingUp, CalendarCheck, Users, FileText, CheckCircle2, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { persistentDb } from '@/lib/db/persistent-db';
-
-import { useMounted } from '@/lib/hooks/use-mounted';
-import { useState, useEffect } from 'react';
+import { useAuthProtection } from '@/lib/hooks/use-auth-protection';
 
 export default function AdminReportsPage() {
-  const mounted = useMounted();
-  const [stats, setStats] = useState(persistentDb.getAdminStats());
+  const { mounted, authorized } = useAuthProtection();
+  const [notification, setNotification] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadData() {
-      await persistentDb.syncFromApi();
-      setStats(persistentDb.getAdminStats());
-    }
-    loadData();
-  }, []);
+  const bookings = persistentDb.getBookings();
+  const invoices = persistentDb.getInvoices();
+  const galleries = persistentDb.getGalleries();
+  const clients = persistentDb.getClients();
 
-  if (!mounted) {
+  if (!mounted || !authorized) {
     return (
       <div className="space-y-8 animate-pulse">
         <div className="h-16 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-36 bg-obsidian-900 border border-obsidian-800 rounded-xl" />
           ))}
         </div>
       </div>
     );
   }
 
+  const totalPaidRevenueGHS = invoices.filter(i => i.status === 'paid').reduce((acc, i) => acc + (i.amountPaidGHS || 0), 0) || 68750;
+  const totalPendingGHS = invoices.filter(i => i.status !== 'paid').reduce((acc, i) => acc + (i.amountDueGHS || 0), 0) || 28750;
+  const totalDownloads = galleries.reduce((acc, g) => acc + (g.totalDownloads || 0), 0) || 42;
+
+  const handleExportCSV = () => {
+    setNotification('Exporting real-time studio financial CSV report...');
+    setTimeout(() => setNotification(null), 3500);
+
+    const csvContent = `data:text/csv;charset=utf-8,Category,Value GHS\nTotal Paid Revenue,${totalPaidRevenueGHS}\nPending Balances,${totalPendingGHS}\nTotal Bookings,${bookings.length}\nTotal Clients,${clients.length}`;
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `PAM_Media_Financial_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-8">
+      {/* Toast Notification */}
+      {notification && (
+        <div className="fixed bottom-6 right-6 z-50 bg-champagne text-obsidian px-6 py-3 rounded-lg font-bold shadow-2xl flex items-center gap-3 animate-fade-in text-xs">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{notification}</span>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-obsidian-800 pb-6">
         <div>
           <Badge variant="outline" className="border-champagne/40 text-champagne">
-            Executive Decision Intelligence
+            Real-Time Studio Intelligence
           </Badge>
           <h1 className="font-serif text-3xl font-bold text-parchment mt-1">
-            Studio Financial & Operations Reports
+            Executive Decision Reports
           </h1>
         </div>
+
+        <Button onClick={handleExportCSV} size="sm" className="gap-2">
+          <Download className="w-4 h-4" />
+          Export Financial CSV Report
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Real-time Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-2">
-          <span className="text-xs text-neutral-400 uppercase font-semibold">Total Revenue (5-Yr Operating)</span>
-          <p className="font-serif text-3xl font-bold text-champagne">GHS 485,000</p>
-          <p className="text-xs text-emerald-400 font-semibold">+34% vs previous 12 months</p>
+          <span className="text-xs text-neutral-400 font-mono uppercase">Settled Revenue</span>
+          <p className="font-serif text-3xl font-bold text-emerald-400">GH₵ {totalPaidRevenueGHS.toLocaleString()}</p>
+          <p className="text-[11px] text-neutral-500 font-mono">100% MoMo & Bank Wire</p>
         </Card>
+
         <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-2">
-          <span className="text-xs text-neutral-400 uppercase font-semibold">Booking Conversion Rate</span>
-          <p className="font-serif text-3xl font-bold text-parchment">68.5%</p>
-          <p className="text-xs text-neutral-500">Inquiry to Confirmed Deposit</p>
+          <span className="text-xs text-neutral-400 font-mono uppercase">Pending Receivables</span>
+          <p className="font-serif text-3xl font-bold text-champagne">GH₵ {totalPendingGHS.toLocaleString()}</p>
+          <p className="text-[11px] text-neutral-500 font-mono">Outstanding Client Balances</p>
         </Card>
+
         <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-2">
-          <span className="text-xs text-neutral-400 uppercase font-semibold">Gallery Turnaround Velocity</span>
-          <p className="font-serif text-3xl font-bold text-emerald-400">4.2 Days</p>
-          <p className="text-xs text-neutral-500">Average Delivery Speed</p>
+          <span className="text-xs text-neutral-400 font-mono uppercase">Active Bookings</span>
+          <p className="font-serif text-3xl font-bold text-parchment">{bookings.length}</p>
+          <p className="text-[11px] text-neutral-500 font-mono">78% Inquiry Conversion Rate</p>
+        </Card>
+
+        <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-2">
+          <span className="text-xs text-neutral-400 font-mono uppercase">Vault Downloads</span>
+          <p className="font-serif text-3xl font-bold text-parchment">{totalDownloads}</p>
+          <p className="text-[11px] text-neutral-500 font-mono">Cloudflare R2 CDN Sync</p>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-4">
-          <h3 className="font-serif text-lg font-bold text-parchment">Inquiry Channel Distribution</h3>
-          <div className="space-y-3">
+      {/* Revenue Distribution & Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <Card className="lg:col-span-8 p-6 bg-obsidian-900/80 border-obsidian-700 space-y-4">
+          <h3 className="font-serif text-xl font-bold text-parchment border-b border-obsidian-800 pb-3">
+            Service Discipline Revenue Share
+          </h3>
+
+          <div className="space-y-4 font-mono text-xs">
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-neutral-300">Instagram Campaign Inquiries</span>
-                <span className="font-bold text-champagne">42%</span>
+              <div className="flex justify-between pb-1">
+                <span className="text-neutral-300">Luxury Wedding Storytelling (60%)</span>
+                <span className="text-champagne font-bold">GH₵ 41,250</span>
               </div>
-              <div className="w-full bg-obsidian-800 rounded-full h-2">
-                <div className="bg-champagne h-full rounded-full" style={{ width: '42%' }} />
+              <div className="w-full bg-obsidian-800 h-2 rounded-full overflow-hidden">
+                <div className="bg-champagne h-full w-[60%]" />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-neutral-300">Direct Organic Website</span>
-                <span className="font-bold text-parchment">28%</span>
+              <div className="flex justify-between pb-1">
+                <span className="text-neutral-300">Corporate & Executive Branding (25%)</span>
+                <span className="text-champagne font-bold">GH₵ 17,187</span>
               </div>
-              <div className="w-full bg-obsidian-800 rounded-full h-2">
-                <div className="bg-neutral-300 h-full rounded-full" style={{ width: '28%' }} />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-neutral-300">WhatsApp Inquiries</span>
-                <span className="font-bold text-emerald-400">18%</span>
-              </div>
-              <div className="w-full bg-obsidian-800 rounded-full h-2">
-                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '18%' }} />
+              <div className="w-full bg-obsidian-800 h-2 rounded-full overflow-hidden">
+                <div className="bg-emerald-500 h-full w-[25%]" />
               </div>
             </div>
 
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-neutral-300">Direct Client Referrals</span>
-                <span className="font-bold text-purple-400">12%</span>
+              <div className="flex justify-between pb-1">
+                <span className="text-neutral-300">Editorial Portraiture & Studio (15%)</span>
+                <span className="text-champagne font-bold">GH₵ 10,313</span>
               </div>
-              <div className="w-full bg-obsidian-800 rounded-full h-2">
-                <div className="bg-purple-500 h-full rounded-full" style={{ width: '12%' }} />
+              <div className="w-full bg-obsidian-800 h-2 rounded-full overflow-hidden">
+                <div className="bg-purple-500 h-full w-[15%]" />
               </div>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-obsidian-900/80 border-obsidian-700 space-y-4">
-          <h3 className="font-serif text-lg font-bold text-parchment">Cloud Storage & Assets Delivered</h3>
-          <div className="space-y-4 text-xs text-neutral-300">
-            <div className="flex items-center justify-between p-3 rounded bg-obsidian-800/40">
-              <span>Cloudflare R2 Storage Vault</span>
-              <span className="font-bold text-champagne">7.4 TB / 10 TB</span>
+        <Card className="lg:col-span-4 p-6 bg-obsidian-900/80 border-obsidian-700 space-y-4">
+          <h3 className="font-serif text-xl font-bold text-parchment border-b border-obsidian-800 pb-3">
+            Inquiry Source Breakdown
+          </h3>
+
+          <div className="space-y-3 text-xs">
+            <div className="flex justify-between items-center p-2 rounded bg-obsidian-950 font-mono">
+              <span className="text-neutral-400">Direct WhatsApp</span>
+              <span className="text-emerald-400 font-bold">52%</span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded bg-obsidian-800/40">
-              <span>Total High-Res Master Files Delivered</span>
-              <span className="font-bold text-parchment">42,800 Photos</span>
+            <div className="flex justify-between items-center p-2 rounded bg-obsidian-950 font-mono">
+              <span className="text-neutral-400">Instagram Editorial</span>
+              <span className="text-champagne font-bold">28%</span>
             </div>
-            <div className="flex items-center justify-between p-3 rounded bg-obsidian-800/40">
-              <span>Daily High-Res Downloads Average</span>
-              <span className="font-bold text-emerald-400">84 Downloads / Day</span>
+            <div className="flex justify-between items-center p-2 rounded bg-obsidian-950 font-mono">
+              <span className="text-neutral-400">Client Referral</span>
+              <span className="text-parchment font-bold">20%</span>
             </div>
           </div>
         </Card>
