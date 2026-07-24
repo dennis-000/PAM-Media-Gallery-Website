@@ -160,6 +160,23 @@
   ],
   "galleries": [
     {
+      "title": "Dee Gala",
+      "slug": "dee-gala",
+      "clientName": "Dee",
+      "clientEmail": "odennisasiedu@gmail.com",
+      "pinCode": "1113",
+      "coverImage": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1600",
+      "allowDownloads": true,
+      "watermarkEnabled": false,
+      "status": "active",
+      "id": "gal-1784853718539",
+      "imageCount": 0,
+      "favoriteCount": 0,
+      "totalDownloads": 0,
+      "viewCount": 1,
+      "createdAt": "2026-07-24T00:41:58.539Z"
+    },
+    {
       "id": "gal-kwame-ama-2026",
       "title": "Kwame & Ama — Royal Wedding at Labadi Beach",
       "slug": "kwame-ama-wedding",
@@ -410,6 +427,14 @@
     }
   ],
   "activityLogs": [
+    {
+      "action": "Client Gallery Created",
+      "entityType": "gallery",
+      "entityId": "gal-1784853718539",
+      "details": "Gallery \"Dee Gala\" initialized for Dee",
+      "id": "act-1784853718539",
+      "timestamp": "Just now"
+    },
     {
       "id": "act-1",
       "action": "Gallery Access",
