@@ -412,6 +412,46 @@
   ],
   "activityLogs": [
     {
+      "action": "Project Workflow Stage Shift",
+      "entityType": "project",
+      "entityId": "prj-1784861860813",
+      "details": "Project PRJ-2026-190 moved to SHOOTING",
+      "id": "act-1784861950033",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Project Workflow Stage Shift",
+      "entityType": "project",
+      "entityId": "prj-101",
+      "details": "Project PRJ-2026-042 moved to EDITING",
+      "id": "act-1784861931562",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Project Workflow Stage Shift",
+      "entityType": "project",
+      "entityId": "prj-101",
+      "details": "Project PRJ-2026-042 moved to SHOOTING",
+      "id": "act-1784861825162",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Project Workflow Stage Shift",
+      "entityType": "project",
+      "entityId": "prj-101",
+      "details": "Project PRJ-2026-042 moved to EDITING",
+      "id": "act-1784861821452",
+      "timestamp": "Just now"
+    },
+    {
+      "action": "Project Workflow Stage Shift",
+      "entityType": "project",
+      "entityId": "prj-101",
+      "details": "Project PRJ-2026-042 moved to REVIEW",
+      "id": "act-1784861819252",
+      "timestamp": "Just now"
+    },
+    {
       "id": "act-1",
       "action": "Gallery Access",
       "entityType": "gallery",
@@ -438,13 +478,29 @@
   ],
   "projects": [
     {
+      "title": "GoldKey Properties Ghana — Commercial Campaign & Content",
+      "clientName": "GoldKey Properties Ghana",
+      "clientEmail": "marketing@goldkey.com.gh",
+      "stage": "shooting",
+      "shootDate": "2026-08-05",
+      "dueDate": "2026-08-05",
+      "assignedLead": "Pamela Asiedu",
+      "totalPhotosExpected": 250,
+      "serviceCategory": "Weddings",
+      "id": "prj-1784861860813",
+      "projectNumber": "PRJ-2026-190",
+      "progressPercent": 15,
+      "photosEdited": 0,
+      "createdAt": "2026-07-24T02:57:40.813Z"
+    },
+    {
       "id": "prj-101",
       "projectNumber": "PRJ-2026-042",
       "title": "Kwame & Ama — Royal Wedding",
       "clientName": "Kwame & Ama Mensah",
       "clientEmail": "kwame.mensah@example.com",
       "serviceCategory": "Luxury Weddings",
-      "stage": "gallery_ready",
+      "stage": "editing",
       "shootDate": "2026-06-14",
       "dueDate": "2026-07-01",
       "assignedLead": "Pamela Addo (Chief Photographer)",
@@ -472,7 +528,33 @@
       "createdAt": "2025-02-14T10:00:00Z"
     }
   ],
-  "invoices": [],
+  "invoices": [
+    {
+      "id": "inv-1784861860815",
+      "invoiceNumber": "PAM-INV-2026-152",
+      "clientName": "GoldKey Properties Ghana",
+      "clientEmail": "marketing@goldkey.com.gh",
+      "serviceTitle": "Commercial Campaign & Content",
+      "subtotalGHS": 25000,
+      "vatGHS": 3750,
+      "totalGHS": 28750,
+      "amountDueGHS": 28750,
+      "amountPaidGHS": 0,
+      "status": "sent",
+      "dueDate": "2026-08-05",
+      "items": [
+        {
+          "description": "Commercial Campaign & Content",
+          "amountGHS": 25000
+        },
+        {
+          "description": "VAT (15%)",
+          "amountGHS": 3750
+        }
+      ],
+      "createdAt": "2026-07-24T02:57:40.815Z"
+    }
+  ],
   "messages": [],
   "team": [
     {
